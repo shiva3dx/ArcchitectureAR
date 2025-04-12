@@ -1,69 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AR Building Viewer</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-    model-viewer {
-      width: 100%;
-      height: 100vh;
-    }
-    #ar-button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #ar-button:hover {
-      background: #0056b3;
-    }
-  </style>
-</head>
-<body>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      #muteButton {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background-color: white;
+        color: black;
+        border: 1px solid black;
+        padding: 10px 15px;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 5px;
+        z-index: 10;
+        text-align: center;
+        font-weight: bold;
+      }
 
-  <button id="ar-button">View in AR</button>
+      #muteButton:hover {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: ./qr-code.mind; "
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-assets>
+        <!-- QR Code Image -->
+        <img id="card" src="./qr-code.jpg" />
 
-  <model-viewer
-    id="viewer"
-    src="building.glb"
-    ar
-    ar-modes="webxr scene-viewer"
-    autoplay
-    camera-controls
-    tone-mapping="neutral"
-    poster="poster.webp"
-    shadow-intensity="1.74"
-    exposure="1"
-    field-of-view="30deg"
-    animation-name="default">
-  </model-viewer>
+        <!-- GLB Model -->
+        <a-asset-item id="glb-model" src="./model.glb"></a-asset-item>
+      </a-assets>
 
-  <script>
-    const arButton = document.getElementById('ar-button');
-    const modelViewer = document.getElementById('viewer');
+      <!-- Camera -->
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    // Start AR session when button clicked
-    arButton.addEventListener('click', () => {
-      modelViewer.activateAR();
-      arButton.style.display = 'none';
-    });
+      <!-- Marker Target (QR Code) -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <!-- Display GLB Model when marker is detected -->
+        <a-entity 
+          gltf-model="#glb-model" 
+          position="0 0 0" 
+          scale="1 1 1" 
+          rotation="0 0 0">
+        </a-entity>
+      </a-entity>
+    </a-scene>
 
-    // Optional: make sure animation plays after loading
-    modelViewer.addEventListener('load', () => {
-      modelViewer.play();
-    });
-  </script>
+    <button id="muteButton">Unmute</button>
 
-</body>
+    <script>
+      const video = document.querySelector("#video");
+      const muteButton = document.querySelector("#muteButton");
+
+      // Toggle mute and unmute
+      muteButton.addEventListener("click", () => {
+        if (video.muted) {
+          video.muted = false;
+          video.play()
+            .then(() => {
+              console.log("Video unmuted.");
+              muteButton.innerText = "Mute"; // Change button text to "Mute"
+            })
+            .catch((error) => console.error("Error unmuting video:", error));
+        } else {
+          video.muted = true;
+          console.log("Video muted.");
+          muteButton.innerText = "Unmute"; // Change button text to "Unmute"
+        }
+      });
+
+      // Handle marker events for pausing and playing video
+      const marker = document.querySelector("[mindar-image-target]");
+
+      // Pause video when marker is lost
+      marker.addEventListener("targetLost", () => {
+        video.pause();
+        console.log("Marker lost. Video paused.");
+      });
+
+      // Resume video when marker is found
+      marker.addEventListener("targetFound", () => {
+        video.play().catch((error) => {
+          console.error("Error resuming video:", error);
+        });
+        console.log("Marker found. Video resumed.");
+      });
+    </script>
+  </body>
 </html>
