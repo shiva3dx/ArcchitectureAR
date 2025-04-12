@@ -4,97 +4,40 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      #muteButton {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background-color: white;
-        color: black;
-        border: 1px solid black;
-        padding: 10px 15px;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 5px;
-        z-index: 10;
-        text-align: center;
-        font-weight: bold;
-      }
-
-      #muteButton:hover {
-        background-color: #f0f0f0;
+      body {
+        margin: 0;
+        overflow: hidden;
       }
     </style>
   </head>
   <body>
     <a-scene
-      mindar-image="imageTargetSrc: ./qr-code.mind; "
+      mindar-image="imageTargetSrc: ./qr-code.mind;"
       color-space="sRGB"
       renderer="colorManagement: true, physicallyCorrectLights"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
+      embedded
     >
       <a-assets>
-        <!-- QR Code Image -->
+        <!-- Image Target -->
         <img id="card" src="./qr-code.jpg" />
-
-        <!-- GLB Model -->
+        <!-- 3D Model -->
         <a-asset-item id="glb-model" src="./model.glb"></a-asset-item>
       </a-assets>
 
       <!-- Camera -->
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Marker Target (QR Code) -->
+      <!-- Marker -->
       <a-entity mindar-image-target="targetIndex: 0">
-        <!-- Display GLB Model when marker is detected -->
         <a-entity 
           gltf-model="#glb-model" 
           position="0 0 0" 
-          scale="1 1 1" 
+          scale="0.2 0.2 0.2" 
           rotation="0 0 0">
         </a-entity>
       </a-entity>
     </a-scene>
-
-    <button id="muteButton">Unmute</button>
-
-    <script>
-      const video = document.querySelector("#video");
-      const muteButton = document.querySelector("#muteButton");
-
-      // Toggle mute and unmute
-      muteButton.addEventListener("click", () => {
-        if (video.muted) {
-          video.muted = false;
-          video.play()
-            .then(() => {
-              console.log("Video unmuted.");
-              muteButton.innerText = "Mute"; // Change button text to "Mute"
-            })
-            .catch((error) => console.error("Error unmuting video:", error));
-        } else {
-          video.muted = true;
-          console.log("Video muted.");
-          muteButton.innerText = "Unmute"; // Change button text to "Unmute"
-        }
-      });
-
-      // Handle marker events for pausing and playing video
-      const marker = document.querySelector("[mindar-image-target]");
-
-      // Pause video when marker is lost
-      marker.addEventListener("targetLost", () => {
-        video.pause();
-        console.log("Marker lost. Video paused.");
-      });
-
-      // Resume video when marker is found
-      marker.addEventListener("targetFound", () => {
-        video.play().catch((error) => {
-          console.error("Error resuming video:", error);
-        });
-        console.log("Marker found. Video resumed.");
-      });
-    </script>
   </body>
 </html>
