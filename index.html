@@ -12,7 +12,7 @@
   </head>
   <body>
     <a-scene
-      mindar-image="imageTargetSrc: ./qr-code.mind;"
+      mindar-image="imageTargetSrc: ./targets.mind;"
       color-space="sRGB"
       renderer="colorManagement: true, physicallyCorrectLights"
       vr-mode-ui="enabled: false"
@@ -20,8 +20,9 @@
       embedded
     >
       <a-assets>
-        <!-- Image Target -->
-        <img id="card" src="./qr-code.jpg" />
+        <!-- Optional preview image -->
+        <img id="card" src="./target-preview.jpg" />
+
         <!-- 3D Model -->
         <a-asset-item id="glb-model" src="./model.glb"></a-asset-item>
       </a-assets>
